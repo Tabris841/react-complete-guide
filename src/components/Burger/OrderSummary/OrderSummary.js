@@ -1,9 +1,9 @@
 import React from 'react';
 
-import Aux from '../../../hoc/Auxiliary/Aux';
+import Auxiliary from '../../../hoc/Auxiliary/Auxiliary';
 import Button from '../../UI/Button/Button';
 
-const OrderSummary = props => {
+const orderSummary = props => {
   const ingredientSummary = Object.keys(props.ingredients).map(igKey => {
     return (
       <li key={igKey}>
@@ -14,7 +14,7 @@ const OrderSummary = props => {
   });
 
   return (
-    <Aux>
+    <Auxiliary>
       <h3>Your Order</h3>
       <p>A delicious burger with the following ingredients:</p>
       <ul>{ingredientSummary}</ul>
@@ -28,8 +28,8 @@ const OrderSummary = props => {
       <Button btnType="Success" clicked={props.purchaseContinued}>
         CONTINUE
       </Button>
-    </Aux>
+    </Auxiliary>
   );
 };
 
-export default OrderSummary;
+export default orderSummary;
