@@ -1,54 +1,77 @@
-import { take, put, call, fork, select, all } from 'redux-saga/effects';
-import axios from 'axios';
+import { put, call, fork, all, takeEvery, delay } from 'redux-saga/effects';
 
 import * as actionTypes from '../store/actions/actionTypes';
-import { authSuccess, checkAuthTimeout, authFail } from '../store/actions';
+import * as actions from '../store/actions';
+import { fetchUser, fetchIngredients } from '../services';
 
-function getUser(url, authData) {
-  return axios
-    .post(url, authData)
-    .then(response => {
-      const expirationDate = new Date(
-        new Date().getTime() + response.data.expiresIn * 1000
-      );
-      localStorage.setItem('token', response.data.idToken);
-      localStorage.setItem('expirationDate', expirationDate);
-      localStorage.setItem('userId', response.data.localId);
-      return { response };
-    })
-    .catch(error => {
-      return { error };
-    });
-}
+/***************************** Subroutines ************************************/
 
-function* requestUser({ email, password, isSignup }) {
+function* loadUser({ email, password, isSignup }) {
   const authData = {
     email: email,
     password: password,
     returnSecureToken: true
   };
-  let url =
-    'https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=AIzaSyAPKcOlhXKdL_kNbEukYtIiw5AriB02Aac';
-  if (!isSignup) {
-    url =
-      'https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=AIzaSyAPKcOlhXKdL_kNbEukYtIiw5AriB02Aac';
-  }
-  const { response, error } = yield call(getUser, url, authData);
+
+  const { response, error } = yield call(fetchUser, isSignup, authData);
+
   if (response) {
-    yield put(authSuccess(response.data.idToken, response.data.localId));
-    yield put(checkAuthTimeout(response.data.expiresIn));
+    yield put(
+      actions.authSuccess({
+        token: response.idToken,
+        userId: response.localId,
+        expiresIn: response.expiresIn
+      })
+    );
+    yield delay(response.expiresIn * 1000);
+    yield put(actions.logout);
   } else {
-    yield put(authFail(error.response.data.error));
+    yield put(actions.authFail(error.response.data.error));
   }
 }
 
-function* watchAuth() {
-  while (true) {
-    const { email, password, isSignup } = yield take(actionTypes.AUTH_START);
-    yield fork(requestUser, { email, password, isSignup });
+function* authCheckState() {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    yield put(actions.logout);
+  } else {
+    const expirationDate = new Date(localStorage.getItem('expirationDate'));
+    if (expirationDate <= new Date()) {
+      yield put(actions.logout);
+    } else {
+      const userId = localStorage.getItem('userId');
+      yield put({ type: actionTypes.AUTH_SUCCESS, token, userId });
+      yield delay((expirationDate.getTime() - new Date().getTime()) / 1000);
+      yield put(actions.logout);
+    }
   }
+}
+
+function* loadIngredients() {
+  const { response } = yield call(fetchIngredients);
+  if (response) {
+    yield put(actions.setIngredients(response));
+  } else {
+    yield put(actions.fetchIngredientsFailed);
+  }
+}
+
+/******************************************************************************/
+/******************************* WATCHERS *************************************/
+/******************************************************************************/
+
+function* watchAuth() {
+  yield takeEvery(actionTypes.AUTH_START, loadUser);
+}
+
+function* watchAuthState() {
+  yield takeEvery(actionTypes.AUTH_CHECK_STATE, authCheckState);
+}
+
+function* watchBurgerBuilder() {
+  yield takeEvery(actionTypes.FETCH_INGREDIENTS, loadIngredients);
 }
 
 export default function* root() {
-  yield all([fork(watchAuth)]);
+  yield all([fork(watchAuth), fork(watchBurgerBuilder), fork(watchAuthState)]);
 }

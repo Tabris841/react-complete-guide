@@ -8,8 +8,8 @@ import Modal from '../../components/UI/Modal/Modal';
 import OrderSummary from '../../components/Burger/OrderSummary/OrderSummary';
 import Spinner from '../../components/UI/Spinner/Spinner';
 import withErrorHandler from '../../hoc/withErrorHandler/withErrorHandler';
-import * as actions from '../../store/actions/index';
-import axios from '../../axios-orders';
+import * as actions from '../../store/actions';
+import orderService from '../../services/orderService';
 
 class BurgerBuilder extends Component {
   state = {
@@ -114,7 +114,7 @@ const mapDispatchToProps = dispatch => {
   return {
     onIngredientAdded: ingName => dispatch(actions.addIngredient(ingName)),
     onIngredientRemoved: ingName => dispatch(actions.removeIngredient(ingName)),
-    onInitIngredients: () => dispatch(actions.initIngredients()),
+    onInitIngredients: () => dispatch(actions.fetchIngredients()),
     onInitPurchase: () => dispatch(actions.purchaseInit()),
     onSetAuthRedirectPath: path => dispatch(actions.setAuthRedirectPath(path))
   };
@@ -123,4 +123,4 @@ const mapDispatchToProps = dispatch => {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(withErrorHandler(BurgerBuilder, axios));
+)(withErrorHandler(BurgerBuilder, orderService));
