@@ -6,8 +6,8 @@ import classes from './Auth.css';
 import Input from '../../components/UI/Input/Input';
 import Button from '../../components/UI/Button/Button';
 import Spinner from '../../components/UI/Spinner/Spinner';
-import * as actions from '../../store/actions';
 import { updateObject, checkValidity } from '../../shared/utility';
+import { auth } from '../../store/actions';
 
 class Auth extends Component {
   state = {
@@ -145,8 +145,8 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
   return {
     onAuth: (email, password, isSignup) =>
-      dispatch(actions.authStart(email, password, isSignup)),
-    onSetAuthRedirectPath: () => dispatch(actions.setAuthRedirectPath('/'))
+      dispatch(auth.authStart(email, password, isSignup)),
+    onSetAuthRedirectPath: () => dispatch(auth.setAuthRedirectPath('/'))
   };
 };
 

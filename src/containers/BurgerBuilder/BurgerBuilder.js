@@ -8,8 +8,8 @@ import Modal from '../../components/UI/Modal/Modal';
 import OrderSummary from '../../components/Burger/OrderSummary/OrderSummary';
 import Spinner from '../../components/UI/Spinner/Spinner';
 import withErrorHandler from '../../hoc/withErrorHandler/withErrorHandler';
-import * as actions from '../../store/actions';
 import orderService from '../../services/orderService';
+import { auth, order, burgerBuilder } from '../../store/actions';
 
 class BurgerBuilder extends Component {
   state = {
@@ -112,11 +112,13 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    onIngredientAdded: ingName => dispatch(actions.addIngredient(ingName)),
-    onIngredientRemoved: ingName => dispatch(actions.removeIngredient(ingName)),
-    onInitIngredients: () => dispatch(actions.fetchIngredients()),
-    onInitPurchase: () => dispatch(actions.purchaseInit()),
-    onSetAuthRedirectPath: path => dispatch(actions.setAuthRedirectPath(path))
+    onIngredientAdded: ingName =>
+      dispatch(burgerBuilder.addIngredient(ingName)),
+    onIngredientRemoved: ingName =>
+      dispatch(burgerBuilder.removeIngredient(ingName)),
+    onInitIngredients: () => dispatch(burgerBuilder.fetchIngredients()),
+    onInitPurchase: () => dispatch(order.purchaseInit()),
+    onSetAuthRedirectPath: path => dispatch(auth.setAuthRedirectPath(path))
   };
 };
 

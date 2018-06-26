@@ -1,11 +1,11 @@
 import {
   REQUEST,
-  USER,
+  AUTH,
   SUCCESS,
   FAILURE,
   AUTH_LOGOUT,
   SET_AUTH_REDIRECT_PATH
-} from './actionTypes';
+} from '../actions';
 import { updateObject } from '../../shared/utility';
 
 const initialState = {
@@ -46,11 +46,11 @@ const setAuthRedirectPath = (state, action) => {
 
 const reducer = (state = initialState, action) => {
   switch (action.type) {
-    case USER[REQUEST]:
+    case AUTH[REQUEST]:
       return authStart(state, action);
-    case USER[SUCCESS]:
+    case AUTH[SUCCESS]:
       return authSuccess(state, action);
-    case USER[FAILURE]:
+    case AUTH[FAILURE]:
       return authFail(state, action);
     case AUTH_LOGOUT:
       return authLogout(state, action);

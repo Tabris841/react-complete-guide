@@ -8,8 +8,8 @@ import Spinner from '../../../components/UI/Spinner/Spinner';
 import orderService from '../../../services/orderService';
 import Input from '../../../components/UI/Input/Input';
 import withErrorHandler from '../../../hoc/withErrorHandler/withErrorHandler';
-import * as actions from '../../../store/actions/index';
 import { updateObject, checkValidity } from '../../../shared/utility';
+import { order } from '../../../store/actions';
 
 class ContactData extends Component {
   state = {
@@ -193,7 +193,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
   return {
     onOrderBurger: (orderData, token) =>
-      dispatch(actions.purchaseBurgerStart(orderData, token))
+      dispatch(order.purchaseBurgerStart(orderData, token))
   };
 };
 

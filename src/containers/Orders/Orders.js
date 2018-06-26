@@ -4,8 +4,8 @@ import { connect } from 'react-redux';
 import Order from '../../components/Order/Order';
 import orderService from '../../services/orderService';
 import withErrorHandler from '../../hoc/withErrorHandler/withErrorHandler';
-import * as actions from '../../store/actions/index';
 import Spinner from '../../components/UI/Spinner/Spinner';
+import { order } from '../../store/actions';
 
 class Orders extends Component {
   componentDidMount() {
@@ -39,7 +39,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
   return {
     onFetchOrders: (token, userId) =>
-      dispatch(actions.fetchOrdersStart(token, userId))
+      dispatch(order.fetchOrdersStart(token, userId))
   };
 };
 

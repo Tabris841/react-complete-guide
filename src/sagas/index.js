@@ -1,14 +1,23 @@
 import { put, call, fork, all, takeEvery, delay } from 'redux-saga/effects';
 
-import * as actionTypes from '../store/actions/actionTypes';
-import { auth } from '../store/actions/auth';
+import {
+  auth,
+  order,
+  burgerBuilder,
+  REQUEST,
+  AUTH,
+  SUCCESS,
+  AUTH_CHECK_STATE,
+  INGREDIENTS,
+  ORDERS,
+  PURCHASE_BURGER
+} from '../store/actions';
 import {
   fetchUser,
   fetchIngredients,
   saveOrder,
   fetchOrders
 } from '../services';
-import { REQUEST, AUTH, SUCCESS, AUTH_CHECK_STATE } from './actionTypes';
 
 /***************************** Subroutines ************************************/
 
@@ -56,27 +65,27 @@ function* authCheckState() {
 function* loadIngredients() {
   const { response } = yield call(fetchIngredients);
   if (response) {
-    yield put(actions.setIngredients(response));
+    yield put(burgerBuilder.setIngredients(response));
   } else {
-    yield put(actions.fetchIngredientsFailed);
+    yield put(burgerBuilder.fetchIngredientsFailed);
   }
 }
 
 function* purchaseBurger({ orderData, token }) {
   const { response, error } = yield call(saveOrder, orderData, token);
   if (response) {
-    yield put(actions.purchaseBurgerSuccess(response.name, orderData));
+    yield put(order.purchaseBurgerSuccess(response.name, orderData));
   } else {
-    yield put(actions.purchaseBurgerFail, error);
+    yield put(order.purchaseBurgerFail, error);
   }
 }
 
 function* loadOrders({ token, userId }) {
   const { response, error } = yield call(fetchOrders, token, userId);
   if (response) {
-    yield put(actions.fetchOrdersSuccess(response));
+    yield put(order.fetchOrdersSuccess(response));
   } else {
-    yield put(actions.fetchOrdersFail, error);
+    yield put(order.fetchOrdersFail, error);
   }
 }
 
@@ -93,15 +102,15 @@ function* watchAuthState() {
 }
 
 function* watchBurgerBuilder() {
-  yield takeEvery(actionTypes.FETCH_INGREDIENTS, loadIngredients);
+  yield takeEvery(INGREDIENTS[REQUEST], loadIngredients);
 }
 
 function* watchPurchaseBurger() {
-  yield takeEvery(actionTypes.PURCHASE_BURGER_START, purchaseBurger);
+  yield takeEvery(PURCHASE_BURGER[REQUEST], purchaseBurger);
 }
 
 function* watchFetchOrders() {
-  yield takeEvery(actionTypes.FETCH_ORDERS_START, loadOrders);
+  yield takeEvery(ORDERS[REQUEST], loadOrders);
 }
 
 export default function* root() {

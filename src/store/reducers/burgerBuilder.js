@@ -1,4 +1,10 @@
-import * as actionTypes from '../actions/actionTypes';
+import {
+  INGREDIENT_ADD,
+  INGREDIENT_REMOVE,
+  INGREDIENTS,
+  SUCCESS,
+  FAILURE
+} from '../actions/actionTypes';
 import { updateObject } from '../../shared/utility';
 
 const initialState = {
@@ -57,13 +63,13 @@ const fetchIngredientsFailed = (state, action) => {
 
 const reducer = (state = initialState, action) => {
   switch (action.type) {
-    case actionTypes.ADD_INGREDIENT:
+    case INGREDIENT_ADD:
       return addIngredient(state, action);
-    case actionTypes.REMOVE_INGREDIENT:
+    case INGREDIENT_REMOVE:
       return removeIngredient(state, action);
-    case actionTypes.SET_INGREDIENTS:
+    case INGREDIENTS[SUCCESS]:
       return setIngredients(state, action);
-    case actionTypes.FETCH_INGREDIENTS_FAILED:
+    case INGREDIENTS[FAILURE]:
       return fetchIngredientsFailed(state, action);
     default:
       return state;
