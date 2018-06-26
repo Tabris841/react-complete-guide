@@ -2,7 +2,12 @@ import { put, call, fork, all, takeEvery, delay } from 'redux-saga/effects';
 
 import * as actionTypes from '../store/actions/actionTypes';
 import * as actions from '../store/actions';
-import { fetchUser, fetchIngredients } from '../services';
+import {
+  fetchUser,
+  fetchIngredients,
+  saveOrder,
+  fetchOrders
+} from '../services';
 
 /***************************** Subroutines ************************************/
 
@@ -56,6 +61,24 @@ function* loadIngredients() {
   }
 }
 
+function* purchaseBurger({ orderData, token }) {
+  const { response, error } = yield call(saveOrder, orderData, token);
+  if (response) {
+    yield put(actions.purchaseBurgerSuccess(response.name, orderData));
+  } else {
+    yield put(actions.purchaseBurgerFail, error);
+  }
+}
+
+function* loadOrders({ token, userId }) {
+  const { response, error } = yield call(fetchOrders, token, userId);
+  if (response) {
+    yield put(actions.fetchOrdersSuccess(response));
+  } else {
+    yield put(actions.fetchOrdersFail, error);
+  }
+}
+
 /******************************************************************************/
 /******************************* WATCHERS *************************************/
 /******************************************************************************/
@@ -72,6 +95,20 @@ function* watchBurgerBuilder() {
   yield takeEvery(actionTypes.FETCH_INGREDIENTS, loadIngredients);
 }
 
+function* watchPurchaseBurger() {
+  yield takeEvery(actionTypes.PURCHASE_BURGER_START, purchaseBurger);
+}
+
+function* watchFetchOrders() {
+  yield takeEvery(actionTypes.FETCH_ORDERS_START, loadOrders);
+}
+
 export default function* root() {
-  yield all([fork(watchAuth), fork(watchBurgerBuilder), fork(watchAuthState)]);
+  yield all([
+    fork(watchAuth),
+    fork(watchBurgerBuilder),
+    fork(watchAuthState),
+    fork(watchPurchaseBurger),
+    fork(watchFetchOrders)
+  ]);
 }
