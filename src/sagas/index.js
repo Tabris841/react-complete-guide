@@ -1,13 +1,14 @@
 import { put, call, fork, all, takeEvery, delay } from 'redux-saga/effects';
 
 import * as actionTypes from '../store/actions/actionTypes';
-import * as actions from '../store/actions';
+import { auth } from '../store/actions/auth';
 import {
   fetchUser,
   fetchIngredients,
   saveOrder,
   fetchOrders
 } from '../services';
+import { REQUEST, AUTH, SUCCESS, AUTH_CHECK_STATE } from './actionTypes';
 
 /***************************** Subroutines ************************************/
 
@@ -22,32 +23,32 @@ function* loadUser({ email, password, isSignup }) {
 
   if (response) {
     yield put(
-      actions.authSuccess({
+      auth.success({
         token: response.idToken,
         userId: response.localId,
         expiresIn: response.expiresIn
       })
     );
     yield delay(response.expiresIn * 1000);
-    yield put(actions.logout);
+    yield put(auth.logout);
   } else {
-    yield put(actions.authFail(error.response.data.error));
+    yield put(auth.failure(error.response.data.error));
   }
 }
 
 function* authCheckState() {
   const token = localStorage.getItem('token');
   if (!token) {
-    yield put(actions.logout);
+    yield put(auth.logout);
   } else {
     const expirationDate = new Date(localStorage.getItem('expirationDate'));
     if (expirationDate <= new Date()) {
-      yield put(actions.logout);
+      yield put(auth.logout);
     } else {
       const userId = localStorage.getItem('userId');
-      yield put({ type: actionTypes.AUTH_SUCCESS, token, userId });
+      yield put({ type: AUTH[SUCCESS], token, userId });
       yield delay((expirationDate.getTime() - new Date().getTime()) / 1000);
-      yield put(actions.logout);
+      yield put(auth.logout);
     }
   }
 }
@@ -84,11 +85,11 @@ function* loadOrders({ token, userId }) {
 /******************************************************************************/
 
 function* watchAuth() {
-  yield takeEvery(actionTypes.AUTH_START, loadUser);
+  yield takeEvery(AUTH[REQUEST], loadUser);
 }
 
 function* watchAuthState() {
-  yield takeEvery(actionTypes.AUTH_CHECK_STATE, authCheckState);
+  yield takeEvery(AUTH_CHECK_STATE, authCheckState);
 }
 
 function* watchBurgerBuilder() {
