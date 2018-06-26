@@ -1,4 +1,11 @@
-import * as actionTypes from '../actions/actionTypes';
+import {
+  REQUEST,
+  USER,
+  SUCCESS,
+  FAILURE,
+  AUTH_LOGOUT,
+  SET_AUTH_REDIRECT_PATH
+} from './actionTypes';
 import { updateObject } from '../../shared/utility';
 
 const initialState = {
@@ -39,15 +46,15 @@ const setAuthRedirectPath = (state, action) => {
 
 const reducer = (state = initialState, action) => {
   switch (action.type) {
-    case actionTypes.AUTH_START:
+    case USER[REQUEST]:
       return authStart(state, action);
-    case actionTypes.AUTH_SUCCESS:
+    case USER[SUCCESS]:
       return authSuccess(state, action);
-    case actionTypes.AUTH_FAIL:
+    case USER[FAILURE]:
       return authFail(state, action);
-    case actionTypes.AUTH_LOGOUT:
+    case AUTH_LOGOUT:
       return authLogout(state, action);
-    case actionTypes.SET_AUTH_REDIRECT_PATH:
+    case SET_AUTH_REDIRECT_PATH:
       return setAuthRedirectPath(state, action);
     default:
       return state;
