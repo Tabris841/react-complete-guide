@@ -72,8 +72,10 @@ function* loadIngredients() {
 }
 
 function* purchaseBurger({ orderData, token }) {
+  console.log(arguments);
   const { response, error } = yield call(saveOrder, orderData, token);
   if (response) {
+    debugger;
     yield put(order.purchaseBurgerSuccess(response.name, orderData));
   } else {
     yield put(order.purchaseBurgerFail, error);
