@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
+import { observer, inject } from 'mobx-react';
 
-import Auxiliary from '../Auxiliary/Auxiliary';
 import classes from './Layout.css';
+import Auxiliary from '../Auxiliary/Auxiliary';
 import Toolbar from '../../components/Navigation/Toolbar/Toolbar';
 import SideDrawer from '../../components/Navigation/SideDrawer/SideDrawer';
 
+@inject('store')
+@observer
 class Layout extends Component {
   state = {
     showSideDrawer: false
@@ -25,11 +27,11 @@ class Layout extends Component {
     return (
       <Auxiliary>
         <Toolbar
-          isAuth={this.props.isAuthenticated}
+          isAuth={this.props.store.auth.isAuthenticated}
           drawerToggleClicked={this.sideDrawerToggleHandler}
         />
         <SideDrawer
-          isAuth={this.props.isAuthenticated}
+          isAuth={this.props.store.auth.isAuthenticated}
           open={this.state.showSideDrawer}
           closed={this.sideDrawerClosedHandler}
         />
@@ -39,10 +41,4 @@ class Layout extends Component {
   }
 }
 
-const mapStateToProps = state => {
-  return {
-    isAuthenticated: state.auth.token !== null
-  };
-};
-
-export default connect(mapStateToProps)(Layout);
+export default Layout;

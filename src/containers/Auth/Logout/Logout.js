@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
-import { connect } from 'react-redux';
+import { observer, inject } from 'mobx-react';
 
-import * as actions from '../../../store/actions/index';
-
+@inject('store')
+@observer
 class Logout extends Component {
   componentDidMount() {
-    this.props.onLogout();
+    this.props.store.auth.authLogout();
   }
 
   render() {
@@ -14,10 +14,4 @@ class Logout extends Component {
   }
 }
 
-const mapDispatchToProps = dispatch => {
-  return {
-    onLogout: () => dispatch(actions.logout())
-  };
-};
-
-export default connect(null, mapDispatchToProps)(Logout);
+export default Logout;

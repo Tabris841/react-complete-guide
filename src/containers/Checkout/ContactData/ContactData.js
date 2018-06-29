@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
+import { observer, inject } from 'mobx-react';
 
 import Button from '../../../components/UI/Button/Button';
 import Spinner from '../../../components/UI/Spinner/Spinner';
@@ -7,9 +7,10 @@ import classes from './ContactData.css';
 import axios from '../../../axios-orders';
 import Input from '../../../components/UI/Input/Input';
 import withErrorHandler from '../../../hoc/withErrorHandler/withErrorHandler';
-import * as actions from '../../../store/actions/index';
 import { updateObject, checkValidity } from '../../../shared/utility';
 
+@inject('store')
+@observer
 class ContactData extends Component {
   state = {
     orderForm: {
@@ -108,13 +109,13 @@ class ContactData extends Component {
       ].value;
     }
     const order = {
-      ingredients: this.props.ings,
-      price: this.props.price,
+      ingredients: this.props.store.burgerBuilder.ingredients,
+      price: this.props.store.burgerBuilder.totalPrice,
       orderData: formData,
-      userId: this.props.userId
+      userId: this.props.store.auth.userId
     };
 
-    this.props.onOrderBurger(order, this.props.token);
+    this.props.purchaseBurger(order, this.props.store.auth.token);
   };
 
   inputChangedHandler = (event, inputIdentifier) => {
@@ -167,7 +168,7 @@ class ContactData extends Component {
         </Button>
       </form>
     );
-    if (this.props.loading) {
+    if (this.props.store.order.loading) {
       form = <Spinner />;
     }
     return (
@@ -179,23 +180,4 @@ class ContactData extends Component {
   }
 }
 
-const mapStateToProps = state => {
-  return {
-    ings: state.burgerBuilder.ingredients,
-    price: state.burgerBuilder.totalPrice,
-    loading: state.order.loading,
-    token: state.auth.token,
-    userId: state.auth.userId
-  };
-};
-
-const mapDispatchToProps = dispatch => {
-  return {
-    onOrderBurger: (orderData, token) =>
-      dispatch(actions.purchaseBurger(orderData, token))
-  };
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(
-  withErrorHandler(ContactData, axios)
-);
+export default withErrorHandler(ContactData, axios);

@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
 import { Route, Switch, withRouter, Redirect } from 'react-router-dom';
-import { connect } from 'react-redux';
+import { observer, inject } from 'mobx-react';
 
 import asyncComponent from './hoc/asyncComponent/asyncComponent';
 import Layout from './hoc/Layout/Layout';
 import BurgerBuilder from './containers/BurgerBuilder/BurgerBuilder';
 import Logout from './containers/Auth/Logout/Logout';
-import * as actions from './store/actions/index';
 
 const asyncCheckout = asyncComponent(() => {
   return import('./containers/Checkout/Checkout');
@@ -20,9 +19,11 @@ const asyncAuth = asyncComponent(() => {
   return import('./containers/Auth/Auth');
 });
 
+@inject('store')
+@observer
 class App extends Component {
   componentDidMount() {
-    this.props.onTryAutoSignup();
+    this.props.store.auth.authCheckState();
   }
 
   render() {
@@ -34,7 +35,7 @@ class App extends Component {
       </Switch>
     );
 
-    if (this.props.isAuthenticated) {
+    if (this.props.store.auth.isAuthenticated) {
       routes = (
         <Switch>
           <Route path="/checkout" component={asyncCheckout} />
@@ -55,16 +56,4 @@ class App extends Component {
   }
 }
 
-const mapStateToProps = state => {
-  return {
-    isAuthenticated: state.auth.token !== null
-  };
-};
-
-const mapDispatchToProps = dispatch => {
-  return {
-    onTryAutoSignup: () => dispatch(actions.authCheckState())
-  };
-};
-
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(App));
+export default withRouter(App);
