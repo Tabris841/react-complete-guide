@@ -20,15 +20,15 @@ export const OrderStore = types
           '/orders.json?auth=' + token,
           orderData
         );
-        self.fetchOrdersSuccess(response.data.name, orderData);
+        self.purchaseBurgerSuccess(response.data.name, orderData);
       } catch (e) {
         self.purchaseBurgerFail(e.message);
       }
     }),
-    purchaseBurgerSuccess(orderId) {
+    purchaseBurgerSuccess(orderId, orderData) {
       self.loading = false;
       self.purchased = true;
-      self.orders.push({ id: orderId });
+      self.orders.push({ ...orderData, id: orderId });
     },
     purchaseBurgerFail() {
       self.loading = false;
@@ -50,8 +50,8 @@ export const OrderStore = types
       }
     }),
     fetchOrdersSuccess(orders) {
-      self.orders = orders;
       self.loading = false;
+      self.orders = orders;
     },
     fetchOrdersFail() {
       self.loading = false;

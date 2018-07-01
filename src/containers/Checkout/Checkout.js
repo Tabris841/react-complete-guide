@@ -26,7 +26,7 @@ class Checkout extends Component {
         <div>
           {purchasedRedirect}
           <CheckoutSummary
-            ingredients={this.props.burgerBuilder.ingredients}
+            ingredients={this.props.store.burgerBuilder.ingredients}
             checkoutCancelled={this.checkoutCancelledHandler}
             checkoutContinued={this.checkoutContinuedHandler}
           />

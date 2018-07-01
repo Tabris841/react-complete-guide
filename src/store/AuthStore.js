@@ -74,7 +74,7 @@ export const AuthStore = types
         } else {
           const userId = localStorage.getItem('userId');
           const expirationTime =
-            (expirationDate.getTime() - new Date().getTime()) / 1000;
+            expirationDate.getTime() - new Date().getTime();
 
           self.authSuccess(token, userId);
           setTimeout(() => {

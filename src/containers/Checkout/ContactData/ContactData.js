@@ -115,7 +115,10 @@ class ContactData extends Component {
       userId: this.props.store.auth.userId
     };
 
-    this.props.purchaseBurger(order, this.props.store.auth.token);
+    this.props.store.order.purchaseBurgerStart(
+      order,
+      this.props.store.auth.token
+    );
   };
 
   inputChangedHandler = (event, inputIdentifier) => {
