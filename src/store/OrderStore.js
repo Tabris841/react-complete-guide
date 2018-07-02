@@ -9,51 +9,46 @@ export const OrderStore = types
     loading: types.boolean,
     purchased: types.boolean
   })
-  .actions(self => ({
-    purchaseInit() {
-      self.purchased = false;
-    },
-    purchaseBurgerStart: flow(function* purchaseBurgerStart(orderData, token) {
-      self.loading = true;
-      try {
-        const response = yield axios.post(
-          '/orders.json?auth=' + token,
-          orderData
-        );
-        self.purchaseBurgerSuccess(response.data.name, orderData);
-      } catch (e) {
-        self.purchaseBurgerFail(e.message);
-      }
-    }),
-    purchaseBurgerSuccess(orderId, orderData) {
-      self.loading = false;
-      self.purchased = true;
-      self.orders.push({ ...orderData, id: orderId });
-    },
-    purchaseBurgerFail() {
-      self.loading = false;
-    },
-    fetchOrders: flow(function* fetchOrders(token, userId) {
-      self.loading = true;
-      try {
-        const queryParams =
-          '?auth=' + token + '&orderBy="userId"&equalTo="' + userId + '"';
-        const response = yield axios.get('/orders.json' + queryParams);
-
-        const fetchedOrders = [];
-        for (let key in response.data) {
-          fetchedOrders.push({ ...response.data[key], id: key });
+  .actions(self => {
+    return {
+      purchaseInit() {
+        self.purchased = false;
+      },
+      purchaseBurgerRequest: flow(function* purchaseBurgerRequest(
+        orderData,
+        token
+      ) {
+        self.loading = true;
+        try {
+          const response = yield axios.post(
+            '/orders.json?auth=' + token,
+            orderData
+          );
+          self.purchased = true;
+          self.orders.push({ ...orderData, id: response.data.name });
+        } catch (e) {
+          console.log(e);
+        } finally {
+          self.loading = false;
         }
-        self.fetchOrdersSuccess(fetchedOrders);
-      } catch (e) {
-        self.fetchOrdersFail(e);
-      }
-    }),
-    fetchOrdersSuccess(orders) {
-      self.loading = false;
-      self.orders = orders;
-    },
-    fetchOrdersFail() {
-      self.loading = false;
-    }
-  }));
+      }),
+      fetchOrders: flow(function* fetchOrders(token, userId) {
+        self.loading = true;
+        try {
+          const queryParams =
+            '?auth=' + token + '&orderBy="userId"&equalTo="' + userId + '"';
+          const response = yield axios.get('/orders.json' + queryParams);
+
+          const fetchedOrders = [];
+          for (let key in response.data) {
+            fetchedOrders.push({ ...response.data[key], id: key });
+          }
+          self.orders = fetchedOrders;
+        } catch (e) {
+          console.log(e);
+        } finally {
+          self.loading = false;
+        }
+      })
+    };
+  });

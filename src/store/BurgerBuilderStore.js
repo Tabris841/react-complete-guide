@@ -25,19 +25,13 @@ export const BurgerBuilderStore = types
       self.ingredients[ingredientName] -= 1;
       self.totalPrice -= INGREDIENT_PRICES[ingredientName];
     },
-    setIngredients(ingredients) {
-      self.ingredients = ingredients;
-      self.error = false;
-    },
-    fetchIngredientsFailed() {
-      self.error = true;
-    },
     initIngredients: flow(function* initIngredients() {
       try {
         const response = yield axios.get('/ingredients.json');
-        self.setIngredients(response.data);
+        self.ingredients = response.data;
+        self.error = false;
       } catch (e) {
-        self.fetchIngredientsFailed();
+        self.error = true;
       }
     })
   }));

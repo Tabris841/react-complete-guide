@@ -9,81 +9,80 @@ export const AuthStore = types
     loading: types.boolean,
     authRedirectPath: types.string
   })
-  .actions(self => ({
-    authStart: flow(function* authStart(email, password, isSignup) {
-      self.error = null;
-      self.loading = true;
+  .actions(self => {
+    return {
+      authStart: flow(function* authStart(email, password, isSignup) {
+        self.error = null;
+        self.loading = true;
 
-      const authData = {
-        email: email,
-        password: password,
-        returnSecureToken: true
-      };
+        const authData = {
+          email: email,
+          password: password,
+          returnSecureToken: true
+        };
 
-      let url =
-        'https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=AIzaSyAPKcOlhXKdL_kNbEukYtIiw5AriB02Aac';
-      if (!isSignup) {
-        url =
-          'https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=AIzaSyAPKcOlhXKdL_kNbEukYtIiw5AriB02Aac';
-      }
-      try {
-        const response = yield axios.post(url, authData);
-        const expirationDate = new Date(
-          new Date().getTime() + response.data.expiresIn * 1000
-        );
-        localStorage.setItem('token', response.data.idToken);
-        localStorage.setItem('expirationDate', expirationDate);
-        localStorage.setItem('userId', response.data.localId);
-        self.authSuccess(response.data.idToken, response.data.localId);
-        setTimeout(() => {
-          self.authLogout();
-        }, response.data.expiresIn * 1000);
-      } catch (e) {
-        self.authFail(e.message);
-      }
-    }),
-    authSuccess(token, userId) {
-      self.token = token;
-      self.userId = userId;
-      self.error = null;
-      self.loading = false;
-    },
-    authFail(error) {
-      self.error = error;
-      self.loading = false;
-    },
-    authLogout() {
-      localStorage.removeItem('token');
-      localStorage.removeItem('expirationDate');
-      localStorage.removeItem('userId');
+        let url =
+          'https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=AIzaSyAPKcOlhXKdL_kNbEukYtIiw5AriB02Aac';
+        if (!isSignup) {
+          url =
+            'https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=AIzaSyAPKcOlhXKdL_kNbEukYtIiw5AriB02Aac';
+        }
+        try {
+          const response = yield axios.post(url, authData);
+          const expirationTime = new Date(
+            new Date().getTime() + response.data.expiresIn * 1000
+          );
+          localStorage.setItem('token', response.data.idToken);
+          localStorage.setItem('expirationDate', expirationTime);
+          localStorage.setItem('userId', response.data.localId);
 
-      self.token = null;
-      self.userId = null;
-    },
-    setAuthRedirectPath(path) {
-      self.authRedirectPath = path;
-    },
-    authCheckState() {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        self.authLogout();
-      } else {
-        const expirationDate = new Date(localStorage.getItem('expirationDate'));
-        if (expirationDate <= new Date()) {
-          self.authLogout();
-        } else {
-          const userId = localStorage.getItem('userId');
-          const expirationTime =
-            expirationDate.getTime() - new Date().getTime();
-
-          self.authSuccess(token, userId);
+          self.token = response.data.idToken;
+          self.userId = response.data.localId;
+          self.error = null;
           setTimeout(() => {
             self.authLogout();
-          }, expirationTime);
+          }, response.data.expiresIn * 1000);
+        } catch (e) {
+          self.error = e.message;
+        } finally {
+          self.loading = false;
+        }
+      }),
+      authLogout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('expirationDate');
+        localStorage.removeItem('userId');
+
+        self.token = null;
+        self.userId = null;
+      },
+      setAuthRedirectPath(path) {
+        self.authRedirectPath = path;
+      },
+      authCheckState() {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          self.authLogout();
+        } else {
+          const expirationDate = new Date(
+            localStorage.getItem('expirationDate')
+          );
+          if (expirationDate <= new Date()) {
+            self.authLogout();
+          } else {
+            const userId = localStorage.getItem('userId');
+            const expirationTime =
+              expirationDate.getTime() - new Date().getTime();
+
+            self.authSuccess(token, userId);
+            setTimeout(() => {
+              self.authLogout();
+            }, expirationTime);
+          }
         }
       }
-    }
-  }))
+    };
+  })
   .views(self => ({
     get isAuthenticated() {
       return self.token !== null;
